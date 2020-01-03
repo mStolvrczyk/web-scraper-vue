@@ -1,8 +1,8 @@
 <template>
-<v-container fluid>
+<v-container>
   <v-row>
-    <v-col>
-      {{scrapeData.details}}
+    <v-col cols="12">
+      <v-card color="#FF9E80" height="400px"></v-card>
     </v-col>
   </v-row>
 </v-container>

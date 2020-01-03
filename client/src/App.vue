@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    <Navbar/>
     <v-content>
       <v-container class="fill-height">
         <router-view/>
@@ -9,11 +10,12 @@
 </template>
 
 <script>
-
+import Navbar from './components/Navbar'
 export default {
   name: 'App',
 
   components: {
+    Navbar
   },
 
   data: () => ({
@@ -21,3 +23,8 @@ export default {
   })
 }
 </script>
+<style>
+  #app {
+    background-color: #ECEFF1;
+  }
+</style>

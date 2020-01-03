@@ -12,10 +12,10 @@
           mdi-home
         </v-icon>
       </router-link>
-      <router-link to="/users" class="v-btn icon pa-3">
-        <v-icon style="font-size: 30px">
-          mdi-view-dashboard        </v-icon>
-      </router-link>
+<!--      <router-link to="/users" class="v-btn icon pa-3">-->
+<!--        <v-icon style="font-size: 30px">-->
+<!--          mdi-view-dashboard        </v-icon>-->
+<!--      </router-link>-->
       <router-link to="/users" class="v-btn icon pa-3">
         <v-icon style="font-size: 30px">
           mdi-database

@@ -1,8 +1,17 @@
 <template>
 <v-container>
   <v-row>
+    <v-col cols="8" offset="2">
+      <v-card height="100px">
+        <v-card-text style="font-size: 20px" class="darken-1--text font-weight-bold" align="center">DETAILS</v-card-text>
+      </v-card>
+    </v-col>
+  </v-row>
+  <v-row>
     <v-col cols="12">
-      <v-card color="#FF9E80" height="400px"></v-card>
+      <v-card height="100px">
+        <v-card-title>SHOPS</v-card-title>
+      </v-card>
     </v-col>
   </v-row>
 </v-container>
@@ -36,6 +45,8 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style>
+  .fill-height {
+    height: 40%;
+  }
 </style>

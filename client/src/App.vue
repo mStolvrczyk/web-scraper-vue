@@ -26,5 +26,6 @@ export default {
 <style>
   #app {
     background-color: #ECEFF1;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 </style>

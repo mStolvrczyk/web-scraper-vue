@@ -3,48 +3,50 @@ const functions = require('../libs/helperFunctions');
 const cheerio = require('cheerio')
 
 module.exports = {
-    scrapePage: async (page) => {
+    scrapePage: async () => {
         let shops = []
         let details = {}
         let comments = []
-        await axios.get(`https://www.ceneo.pl/49541116/opinie-${page}`)
-            .then(functions.getData)
-            .then((data) => {
-                const $ = cheerio.load(data)
-                const siteHeading = $('.product-content')
-                details =  {
-                    name: siteHeading.find('.product-name').text(),
-                    rate: siteHeading.find('.product-score').text().substring(0, 3),
-                    opinions: siteHeading.find('.product-reviews-link').children('span').text()
-                }
-                const commentsWrapper = $('.product-reviews')
-                commentsWrapper.find('.review-box').each((i, el) => {
-                    let advantages = []
-                    let disadvantages = []
-                    let author =  $(el).find('.reviewer-name-line').text()
-                    let rating =  {
-                        recommendation: $(el).find('.product-review-summary').children('em').text(),
-                        rate: $(el).find('.review-score-count').text()
+        for (let i = 1; i < 4; i++) {
+            await axios.get(`https://www.ceneo.pl/49541116/opinie-${i}`)
+                .then(functions.getData)
+                .then((data) => {
+                    const $ = cheerio.load(data)
+                    const siteHeading = $('.product-content')
+                    details =  {
+                        name: siteHeading.find('.product-name').text(),
+                        rate: siteHeading.find('.product-score').text().substring(0, 3),
+                        opinions: siteHeading.find('.product-reviews-link').children('span').text()
                     }
-                    let date = 'Wystawiono '+$(el).find('.review-time').children('time').text()
-                    let content = $(el).find('.product-review-body').text()
-                    $(el).find('.pros-cell').children('ul').children('li').each((i, el) => {
-                        advantages.push($(el).text())
+                    const commentsWrapper = $('.product-reviews')
+                    commentsWrapper.find('.review-box').each((i, el) => {
+                        let advantages = []
+                        let disadvantages = []
+                        let author =  $(el).find('.reviewer-name-line').text()
+                        let rating =  {
+                            recommendation: $(el).find('.product-review-summary').children('em').text(),
+                            rate: $(el).find('.review-score-count').text()
+                        }
+                        let date = 'Wystawiono '+$(el).find('.review-time').children('time').text()
+                        let content = $(el).find('.product-review-body').text()
+                        $(el).find('.pros-cell').children('ul').children('li').each((i, el) => {
+                            advantages.push($(el).text())
+                        })
+                        $(el).find('.cons-cell').children('ul').children('li').each((i, el) => {
+                            disadvantages.push($(el).text())
+                        })
+                        comments.push(({
+                            author,
+                            date,
+                            rating,
+                            content,
+                            advantages,
+                            disadvantages
+                        }))
                     })
-                    $(el).find('.cons-cell').children('ul').children('li').each((i, el) => {
-                        disadvantages.push($(el).text())
-                    })
-                    comments.push(({
-                        author,
-                        date,
-                        rating,
-                        content,
-                        advantages,
-                        disadvantages
-                    }))
-                })
 
-            });
+                });
+        }
         await axios.get('https://www.ceneo.pl/49541116')
             .then(functions.getData)
             .then((data) => {

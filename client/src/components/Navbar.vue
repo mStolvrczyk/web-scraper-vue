@@ -1,7 +1,7 @@
 <template>
   <v-app-bar
     app
-    color="#8D6E63"
+    color="#6D4C41"
     dark
   >
     <v-toolbar-title>Web Scraper</v-toolbar-title>

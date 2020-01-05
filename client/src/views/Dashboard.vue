@@ -4,25 +4,6 @@
     <v-col cols="8" offset="2">
       <v-card class="pa-2">
         <v-card-text style="font-size: 20px" class="darken-1--text font-weight-bold" align="center">Konsola Nintendo Switch Joy-Con 32GB Niebiesko-czerwony</v-card-text>
-<!--        <v-row>-->
-<!--          <v-col cols="10" offset="1" style="text-align: center">-->
-<!--            <v-card color="#BCAAA4" class="pa-2">-->
-<!--              {{scrapeData.details.name}}-->
-<!--            </v-card>-->
-<!--          </v-col>-->
-<!--        </v-row>-->
-<!--        <v-row>-->
-<!--          <v-col cols="4" offset="1" style="text-align: center">-->
-<!--            <v-card color="#BCAAA4" class="pa-2">-->
-<!--              rate: {{scrapeData.details.rate}}-->
-<!--            </v-card>-->
-<!--          </v-col>-->
-<!--          <v-col cols="4" offset="2" style="text-align: center">-->
-<!--            <v-card color="#BCAAA4" class="pa-2">-->
-<!--              opinions: {{scrapeData.details.opinions}}-->
-<!--            </v-card>-->
-<!--          </v-col>-->
-<!--        </v-row>-->
       </v-card>
       <div class="text-center pa-2">
         <v-btn-toggle rounded>
@@ -45,7 +26,7 @@
             </template>
             <span>Transform</span>
           </v-tooltip>
-          <v-btn v-if="transformedData.details.name === null" disabled color="white">
+          <v-btn v-if="transformedData === null" disabled color="white">
             <span style="font-size: 20px" class="brown-1--text font-weight-bold">L</span>
           </v-btn>
           <v-tooltip v-else bottom>
@@ -123,7 +104,7 @@
 <!--    </v-col>-->
 <!--  </v-row>-->
   <transition name="popup">
-    <div v-if="transformDataVisibility" align="center">
+    <div v-if="transformedData !== null" align="center">
       <v-row>
         <v-col cols="6">
           <v-card class="ma-4">
@@ -228,8 +209,10 @@ export default {
   components: { ExtractInfo },
   data () {
     return {
+      responseDetails: null,
+      responseShops: [],
+      responseComments: [],
       extractInfoVisibility: false,
-      transformDataVisibility: false,
       functions: new Functions(),
       scrapeService: new ScrapeService(),
       extractedData: null,
@@ -237,17 +220,7 @@ export default {
         shopsQuantity: null,
         commentsQuantity: null
       },
-      transformedData: {
-        details: {
-          name: null,
-          rate: null,
-          opinions: null
-        },
-        shops: null,
-        shopsQuantity: null,
-        comments: [],
-        commentsQuantity: null
-      }
+      transformedData: null
     }
   },
   methods: {
@@ -264,11 +237,22 @@ export default {
       console.log(arr3)
       console.log('dupa')
     },
-    arrayUnique (array) {
+    arrayUniqueShops (array) {
       let a = array.concat()
       for (let i = 0; i < a.length; ++i) {
         for (let j = i + 1; j < a.length; ++j) {
-          if (a[i] === a[j]) {
+          if (a[i].shopName === a[j].shopName) {
+            a.splice(j--, 1)
+          }
+        }
+      }
+      return a
+    },
+    arrayUniqueComments (array) {
+      let a = array.concat()
+      for (let i = 0; i < a.length; ++i) {
+        for (let j = i + 1; j < a.length; ++j) {
+          if (a[i].content === a[j].content) {
             a.splice(j--, 1)
           }
         }
@@ -276,12 +260,46 @@ export default {
       return a
     },
     async loadData () {
+      await db.firestore().collection('details').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            this.responseDetails = {
+              name: doc.data().name,
+              rate: doc.data().rate,
+              opinions: doc.data().opinions
+            }
+            doc.ref.delete()
+          })
+        })
       await db.firestore().collection('details').add({
         name: this.transformedData.details.name,
         rate: this.transformedData.details.rate,
         opinions: this.transformedData.details.opinions
       })
-      this.$emit('updateAddUserDialogVisibility', false)
+      await db.firestore().collection('shops').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            this.responseShops.push(doc.data())
+            doc.ref.delete()
+          })
+        })
+      let filteredShops = this.arrayUniqueShops(this.transformedData.shops.concat(this.responseShops))
+      filteredShops.forEach(shop => {
+        db.firestore().collection('shops').add(shop)
+      })
+      await db.firestore().collection('comments').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            this.responseComments.push(doc.data())
+            doc.ref.delete()
+          })
+        })
+      let filteredComments = this.arrayUniqueComments(this.transformedData.comments.concat(this.responseComments))
+      filteredComments.forEach(comment => {
+        db.firestore().collection('comments').add(comment)
+      })
+      this.extractedData = null
+      this.transformedData = null
     },
     async extractData () {
       this.extractedData = await this.scrapeService.getPage()
@@ -292,22 +310,25 @@ export default {
       this.extractedDataDetails.commentsQuantity = null
     },
     transformData () {
-      this.transformDataVisibility = true
       let extractedData = this.extractedData
-      this.transformedData.details.name = extractedData.details.name
-      this.transformedData.details.rate = extractedData.details.rate
-      this.transformedData.details.opinions = extractedData.details.opinions
-      this.transformedData.shops = extractedData.shops.map(this.functions.transformShops)
-      this.transformedData.shopsQuantity = this.transformedData.shops.length
-      this.transformedData.comments = extractedData.comments.map(this.functions.transformComments)
-      this.transformedData.commentsQuantity = this.transformedData.comments.length
-      console.log(this.transformedData)
+      this.transformedData = {
+        details: extractedData.details.map(this.functions.transformDetails),
+        shops: extractedData.shops.map(this.functions.transformShops),
+        shopsQuantity: extractedData.shops.length,
+        comments: extractedData.comments.map(this.functions.transformComments),
+        commentsQuantity: extractedData.comments.length
+      }
     }
   },
   watch: {
     'extractedData' (value) {
-      this.extractedDataDetails.shopsQuantity = value.shops.length
-      this.extractedDataDetails.commentsQuantity = value.comments.length
+      if (value !== null) {
+        this.extractedDataDetails.shopsQuantity = value.shops.length
+        this.extractedDataDetails.commentsQuantity = value.comments.length
+      }
+    },
+    'transformedData' (value) {
+      console.log(value.details)
     }
   }
 }

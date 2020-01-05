@@ -45,23 +45,23 @@
             </template>
             <span>Transform</span>
           </v-tooltip>
-          <v-btn disabled color="white">
+          <v-btn v-if="transformedData.details.name === null" disabled color="white">
             <span style="font-size: 20px" class="brown-1--text font-weight-bold">L</span>
           </v-btn>
-<!--          <v-tooltip v-else bottom>-->
-<!--            <template v-slot:activator="{ on }">-->
-<!--              <v-btn color="white" v-on="on">-->
-<!--                <span style="font-size: 20px" class="brown-1&#45;&#45;text font-weight-bold">L</span>-->
-<!--              </v-btn>-->
-<!--            </template>-->
-<!--            <span>Load</span>-->
-<!--          </v-tooltip>-->
+          <v-tooltip v-else bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn @click="loadData" color="white" v-on="on">
+                <span style="font-size: 20px" class="brown-1--text font-weight-bold">L</span>
+              </v-btn>
+            </template>
+            <span>Load</span>
+          </v-tooltip>
         </v-btn-toggle>
       </div>
       <div class="text-center pa-2">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn rounded v-on="on">
+            <v-btn @click="testing" rounded v-on="on">
               <span style="font-size: 20px" class="brown-1--text font-weight-bold">ETL</span>
             </v-btn>
           </template>
@@ -219,6 +219,7 @@
 </template>
 
 <script>
+import db from '../database/firebaseInit'
 import ScrapeService from '../services/ScrapeService'
 import Functions from '../libs/helperFunctions'
 import ExtractInfo from '../components/ExtractInfo'
@@ -250,6 +251,38 @@ export default {
     }
   },
   methods: {
+    testing () {
+      let arr1 = [
+        'auto',
+        'auto'
+      ]
+      let arr2 = [
+        'auto',
+        'auto'
+      ]
+      let arr3 = this.arrayUnique(arr1.concat(arr2))
+      console.log(arr3)
+      console.log('dupa')
+    },
+    arrayUnique (array) {
+      let a = array.concat()
+      for (let i = 0; i < a.length; ++i) {
+        for (let j = i + 1; j < a.length; ++j) {
+          if (a[i] === a[j]) {
+            a.splice(j--, 1)
+          }
+        }
+      }
+      return a
+    },
+    async loadData () {
+      await db.firestore().collection('details').add({
+        name: this.transformedData.details.name,
+        rate: this.transformedData.details.rate,
+        opinions: this.transformedData.details.opinions
+      })
+      this.$emit('updateAddUserDialogVisibility', false)
+    },
     async extractData () {
       this.extractedData = await this.scrapeService.getPage()
     },

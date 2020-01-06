@@ -51,58 +51,6 @@
       </div>
     </v-col>
   </v-row>
-<!--  <v-row>-->
-<!--    <v-col cols="12">-->
-<!--      <v-card height="100px">-->
-<!--        <v-card-text style="font-size: 20px" class="darken-1&#45;&#45;text font-weight-bold" align="center">SHOPS</v-card-text>-->
-<!--        <div v-for="shop in scrapeData.shops" :key="shop.shopName">-->
-<!--          <v-row>-->
-<!--            <v-col cols="8" offset="2">-->
-
-<!--            </v-col>-->
-<!--          </v-row>-->
-<!--        </div>-->
-<!--      </v-card>-->
-<!--      <div class="text-center pa-2">-->
-<!--        <v-btn-toggle rounded>-->
-<!--          <v-tooltip bottom>-->
-<!--            <template v-slot:activator="{ on }">-->
-<!--              <v-btn @click="chartSwitch = true" color="white" v-on="on">-->
-<!--                <span style="font-size: 20px" class="brown-1&#45;&#45;text font-weight-bold">E</span>-->
-<!--              </v-btn>-->
-<!--            </template>-->
-<!--            <span>Extract</span>-->
-<!--          </v-tooltip>-->
-<!--          <v-tooltip bottom>-->
-<!--            <template v-slot:activator="{ on }">-->
-<!--              <v-btn color="white" v-on="on">-->
-<!--                <span style="font-size: 20px" class="brown-1&#45;&#45;text font-weight-bold">T</span>-->
-<!--              </v-btn>-->
-<!--            </template>-->
-<!--            <span>Transform</span>-->
-<!--          </v-tooltip>-->
-<!--          <v-tooltip bottom>-->
-<!--            <template v-slot:activator="{ on }">-->
-<!--              <v-btn color="white" v-on="on">-->
-<!--                <span style="font-size: 20px" class="brown-1&#45;&#45;text font-weight-bold">L</span>-->
-<!--              </v-btn>-->
-<!--            </template>-->
-<!--            <span>Load</span>-->
-<!--          </v-tooltip>-->
-<!--        </v-btn-toggle>-->
-<!--      </div>-->
-<!--      <div class="text-center pa-2">-->
-<!--        <v-tooltip bottom>-->
-<!--          <template v-slot:activator="{ on }">-->
-<!--            <v-btn rounded v-on="on">-->
-<!--              <span style="font-size: 20px" class="brown-1&#45;&#45;text font-weight-bold">ETL</span>-->
-<!--            </v-btn>-->
-<!--          </template>-->
-<!--          <span>Extract -> Transform -> Load</span>-->
-<!--        </v-tooltip>-->
-<!--      </div>-->
-<!--    </v-col>-->
-<!--  </v-row>-->
   <transition name="popup">
     <div v-if="transformedData !== null" align="center">
       <v-row>
@@ -400,9 +348,6 @@ export default {
       filteredComments.forEach(comment => {
         db.firestore().collection('comments').add(comment)
       })
-      console.log(filteredShops.length)
-      console.log(this.responseShops.length)
-      console.log(this.subtraction(filteredShops.length, this.responseShops.length))
       this.extractedData = null
       this.transformedData = null
       this.responseDetails = []

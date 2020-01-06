@@ -9,7 +9,7 @@
           ></v-progress-circular>
         </v-card-text>
         <v-card-text align="center" v-else>
-          <v-card color="#D7CCC8">
+          <v-card color="#D7CCC8" class="pa-3">
             <v-card-text>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-if="loadedDataDetails.newDetailsObjects === 1">{{loadedDataDetails.newDetailsObjects}} set of product details has been
                 loaded</span>

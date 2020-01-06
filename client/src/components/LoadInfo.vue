@@ -9,12 +9,20 @@
           ></v-progress-circular>
         </v-card-text>
         <v-card-text align="center" v-else>
-          <span style="font-size: 18px" class="brown-1--text font-weight-bold">1 set of product details has been
-            loaded</span><br>
-          <span style="font-size: 18px" class="brown-1--text font-weight-bold">{{loadedDataDetails.newShopObjects}}
-          sets of shop objects have been loaded</span><br>
-          <span style="font-size: 18px" class="brown-1--text font-weight-bold">{{loadedDataDetails.newShopObjects}}
-          sets of comment objects have been loaded</span>
+          <v-card-text>
+            <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-if="loadedDataDetails.newDetailsObjects.length === 1">{{loadedDataDetails.newDetailsObjects.length}} set of product details has been
+              loaded</span>
+            <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-else>{{loadedDataDetails.newDetailsObjects.length}} sets of product details have been
+              loaded</span>
+          </v-card-text>
+          <v-card-text>
+            <span style="font-size: 18px" class="brown-1--text font-weight-bold">{{loadedDataDetails.newShopObjects}}
+            sets of shop objects have been loaded</span>
+          </v-card-text>
+          <v-card-text>
+            <span style="font-size: 18px" class="brown-1--text font-weight-bold">{{loadedDataDetails.newCommentObjects}}
+            sets of comment objects have been loaded</span>
+          </v-card-text>
         </v-card-text>
         <div align="center">
           <v-btn @click="closeLoadDialog" color="red" class="white--text mx-2">Close</v-btn>

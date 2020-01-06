@@ -230,8 +230,7 @@ export default {
         commentsQuantity: null
       },
       loadedDataDetails: {
-        shopsQuantity: null,
-        commentsQuantity: null,
+        newDetailsObjects: null,
         newShopObjects: null,
         newCommentObjects: null
       },
@@ -239,6 +238,13 @@ export default {
     }
   },
   methods: {
+    subtraction (a, b) {
+      if (a - b >= 0) {
+        return a - b
+      } else {
+        return 0
+      }
+    },
     arrayUniqueShops (array) {
       let a = array.concat()
       for (let i = 0; i < a.length; ++i) {
@@ -281,6 +287,7 @@ export default {
           })
         })
       let filteredDetails = this.arrayUniqueDetails(this.transformedData.details.concat(this.responseDetails))
+      this.loadedDataDetails.newDetailsObjects = this.subtraction(filteredDetails.length, this.responseDetails.length)
       filteredDetails.forEach(details => {
         db.firestore().collection('details').add(details)
       })
@@ -292,8 +299,7 @@ export default {
           })
         })
       let filteredShops = this.arrayUniqueShops(this.transformedData.shops.concat(this.responseShops))
-      this.loadedDataDetails.shopsQuantity = filteredShops.length
-      this.loadedDataDetails.newShopObjects = filteredShops.length - this.transformedData.shops.length
+      this.loadedDataDetails.newShopObjects = this.subtraction(filteredShops.length, this.responseShops.length)
       filteredShops.forEach(shop => {
         db.firestore().collection('shops').add(shop)
       })
@@ -305,13 +311,18 @@ export default {
           })
         })
       let filteredComments = this.arrayUniqueComments(this.transformedData.comments.concat(this.responseComments))
-      this.loadedDataDetails.commentsQuantity = filteredComments.length
-      this.loadedDataDetails.newCommentObjects = filteredComments.length - this.transformedData.comments.length
+      this.loadedDataDetails.newCommentObjects = this.subtraction(filteredComments.length, this.responseComments.length)
       filteredComments.forEach(comment => {
         db.firestore().collection('comments').add(comment)
       })
+      console.log(filteredShops.length)
+      console.log(this.responseShops.length)
+      console.log(this.subtraction(filteredShops.length, this.responseShops.length))
       this.extractedData = null
       this.transformedData = null
+      this.responseDetails = []
+      this.responseShops = []
+      this.responseComments = []
     },
     async extractData () {
       this.extractedData = await this.scrapeService.getPage()
@@ -343,9 +354,6 @@ export default {
         this.extractedDataDetails.shopsQuantity = value.shops.length
         this.extractedDataDetails.commentsQuantity = value.comments.length
       }
-    },
-    'loadedDataDetails' (value) {
-      console.log(value)
     }
   }
 }

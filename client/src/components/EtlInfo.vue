@@ -9,69 +9,71 @@
           ></v-progress-circular>
         </v-card-text>
         <v-card-text align="center" v-else>
-          <v-card color="#D7CCC8">
-            <div>
+          <v-card color="#D7CCC8" class="pa-3">
+            <v-card-text>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-if="etlDataDetails.extractedData.details === 1">{{etlDataDetails.extractedData.details}} set of product details has been
                 extracted</span>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-else>{{etlDataDetails.extractedData.details}} sets of product details have been
                 extracted</span>
-            </div>
-            <div>
+            </v-card-text>
+            <v-card-text>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-if="etlDataDetails.extractedData.shops
                === 1">{{etlDataDetails.extractedData.shops}} set of shop objects has been
                 extracted</span>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-else>{{etlDataDetails.extractedData.shops}} sets of shop objects have been
                 extracted</span>
-            </div>
-            <div>
+            </v-card-text>
+            <v-card-text>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-if="etlDataDetails.extractedData.comments
                === 1">{{etlDataDetails.extractedData.comments}} set of comment objects has been
                 extracted</span>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-else>{{etlDataDetails.extractedData.comments}} sets of comment objects have been
                 extracted</span>
-            </div><br>
-            <div>
+            </v-card-text>
+            <hr>
+            <v-card-text>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-if="etlDataDetails.transformedData.details === 1">{{etlDataDetails.transformedData.details}} set
                 of product details has been
                 transformed</span>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-else>{{etlDataDetails.transformedData.details}} sets of product details have been
                 transformed</span>
-            </div>
-            <div>
+            </v-card-text>
+            <v-card-text>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-if="etlDataDetails.transformedData.shops
                === 1">{{etlDataDetails.transformedData.shops}} set of shop objects has been
                 transformed</span>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-else>{{etlDataDetails.transformedData.shops}} sets of shop objects have been
                 transformed</span>
-            </div>
-            <div>
+            </v-card-text>
+            <v-card-text>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-if="etlDataDetails.transformedData.comments
                === 1">{{etlDataDetails.transformedData.comments}} set of comment objects has been
                 transformed</span>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-else>{{etlDataDetails.transformedData.comments}} sets of comment objects have been
                 transformed</span>
-            </div><br>
-            <div>
+            </v-card-text>
+            <hr>
+            <v-card-text>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-if="etlDataDetails.loadedData.details === 1">{{etlDataDetails.loadedData.details}} set
                 of product details has been
                 loaded</span>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-else>{{etlDataDetails.loadedData.details}} sets of product details have been
                 loaded</span>
-            </div>
-            <div>
+            </v-card-text>
+            <v-card-text>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-if="etlDataDetails.loadedData.shops
                === 1">{{etlDataDetails.loadedData.shops}} set of shop objects has been
                 loaded</span>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-else>{{etlDataDetails.loadedData.shops}} sets of shop objects have been
                 loaded</span>
-            </div>
-            <div>
+            </v-card-text>
+            <v-card-text>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-if="etlDataDetails.loadedData.comments
                === 1">{{etlDataDetails.loadedData.comments}} set of comment objects has been
                 loaded</span>
               <span style="font-size: 18px" class="brown-1--text font-weight-bold" v-else>{{etlDataDetails.loadedData.comments}} sets of comment objects have been
                 loaded</span>
-            </div>
+            </v-card-text>
           </v-card>
 <!--          <v-card-text>-->
 <!--            <span style="font-size: 18px" class="brown-1&#45;&#45;text font-weight-bold" v-if="loadedDataDetails.newShopObjects === 1">{{loadedDataDetails.newShopObjects}}-->

@@ -348,9 +348,6 @@ export default {
       filteredComments.forEach(comment => {
         db.firestore().collection('comments').add(comment)
       })
-      console.log(filteredShops.length)
-      console.log(this.responseShops.length)
-      console.log(this.subtraction(filteredShops.length, this.responseShops.length))
       this.extractedData = null
       this.transformedData = null
       this.responseDetails = []

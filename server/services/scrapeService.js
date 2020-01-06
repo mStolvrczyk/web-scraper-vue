@@ -21,7 +21,7 @@ module.exports = {
                     opinions
                 })
             })
-        for (let i = 1; i < 4; i++) {
+        for (let i = 1; i < 5; i++) {
             await axios.get(`https://www.ceneo.pl/49541116/opinie-${i}`)
                 .then(functions.getData)
                 .then((data) => {

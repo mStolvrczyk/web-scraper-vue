@@ -42,7 +42,7 @@
       <div class="text-center pa-2">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn rounded v-on="on">
+            <v-btn @click="extractTransformLoadData" rounded v-on="on">
               <span style="font-size: 20px" class="brown-1--text font-weight-bold">ETL</span>
             </v-btn>
           </template>
@@ -234,10 +234,65 @@ export default {
         newShopObjects: null,
         newCommentObjects: null
       },
-      transformedData: null
+      transformedData: null,
+      extractedDataETL: null,
+      transformedDataETL: null
     }
   },
   methods: {
+    async extractTransformLoadData () {
+      let extractedData = await this.scrapeService.getPage()
+      this.transformedDataETL = {
+        details: extractedData.details.map(this.functions.transformDetails),
+        shops: extractedData.shops.map(this.functions.transformShops),
+        shopsQuantity: extractedData.shops.length,
+        comments: extractedData.comments.map(this.functions.transformComments),
+        commentsQuantity: extractedData.comments.length
+      }
+      await db.firestore().collection('details').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            this.responseDetails.push(doc.data())
+            doc.ref.delete()
+          })
+        })
+      let filteredDetails = this.arrayUniqueDetails(this.transformedDataETL.details.concat(this.responseDetails))
+      this.loadedDataDetails.newDetailsObjects = this.subtraction(filteredDetails.length, this.responseDetails.length)
+      filteredDetails.forEach(details => {
+        db.firestore().collection('details').add(details)
+      })
+      await db.firestore().collection('shops').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            this.responseShops.push(doc.data())
+            doc.ref.delete()
+          })
+        })
+      let filteredShops = this.arrayUniqueShops(this.transformedDataETL.shops.concat(this.responseShops))
+      this.loadedDataDetails.newShopObjects = this.subtraction(filteredShops.length, this.responseShops.length)
+      filteredShops.forEach(shop => {
+        db.firestore().collection('shops').add(shop)
+      })
+      await db.firestore().collection('comments').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            this.responseComments.push(doc.data())
+            doc.ref.delete()
+          })
+        })
+      let filteredComments = this.arrayUniqueComments(this.transformedDataETL.comments.concat(this.responseComments))
+      this.loadedDataDetails.newCommentObjects = this.subtraction(filteredComments.length, this.responseComments.length)
+      filteredComments.forEach(comment => {
+        db.firestore().collection('comments').add(comment)
+      })
+      console.log(filteredShops.length)
+      console.log(this.responseShops.length)
+      console.log(this.subtraction(filteredShops.length, this.responseShops.length))
+      this.transformedDataETL = null
+      this.responseDetails = []
+      this.responseShops = []
+      this.responseComments = []
+    },
     subtraction (a, b) {
       if (a - b >= 0) {
         return a - b
@@ -334,8 +389,9 @@ export default {
     },
     closeLoadDialog (value) {
       this.loadInfoVisibility = value
-      this.loadedDataDetails.shopsQuantity = null
-      this.loadedDataDetails.commentsQuantity = null
+      this.loadedDataDetails.newDetailsObjects = null
+      this.loadedDataDetails.newShopObjects = null
+      this.loadedDataDetails.newCommentObjectsObjects = null
     },
     transformData () {
       let extractedData = this.extractedData

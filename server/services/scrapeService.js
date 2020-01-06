@@ -7,7 +7,7 @@ module.exports = {
         let shops = []
         let details = []
         let comments = []
-        await axios.get(`https://www.ceneo.pl/49541116/opinie-1`)
+        await axios.get('https://www.ceneo.pl/49541116/opinie-1')
             .then(functions.getData)
             .then((data) => {
                 const $ = cheerio.load(data)

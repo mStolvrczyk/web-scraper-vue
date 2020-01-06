@@ -17,7 +17,7 @@
           sets of comment objects have been extracted</span>
         </v-card-text>
         <div align="center">
-          <v-btn @click="closeDialog" color="red" class="white--text mx-2">Close</v-btn>
+          <v-btn @click="closeExtractDialog" color="red" class="white--text mx-2">Close</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -32,8 +32,8 @@ export default {
     extractedDataDetails: Object
   },
   methods: {
-    closeDialog () {
-      this.$emit('closeDialog', false)
+    closeExtractDialog () {
+      this.$emit('closeExtractDialog', false)
     }
   }
 }

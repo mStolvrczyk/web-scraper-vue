@@ -31,7 +31,7 @@
           </v-btn>
           <v-tooltip v-else bottom>
             <template v-slot:activator="{ on }">
-              <v-btn @click="loadData" color="white" v-on="on">
+              <v-btn @click="loadData(), loadInfoVisibility = true" color="white" v-on="on">
                 <span style="font-size: 20px" class="brown-1--text font-weight-bold">L</span>
               </v-btn>
             </template>
@@ -42,7 +42,7 @@
       <div class="text-center pa-2">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn @click="testing" rounded v-on="on">
+            <v-btn rounded v-on="on">
               <span style="font-size: 20px" class="brown-1--text font-weight-bold">ETL</span>
             </v-btn>
           </template>
@@ -109,25 +109,27 @@
         <v-col cols="6">
           <v-card class="ma-4">
             <v-card-text style="font-size: 18px" class="darken-1--text font-weight-bold" align="center">DETAILS</v-card-text>
-            <v-row>
-              <v-col cols="8" offset="2" style="text-align: center">
-                <v-card color="#BCAAA4" class="pa-2">
-                  {{transformedData.details.name}}
-                </v-card>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="4" offset="1" style="text-align: center">
-                <v-card color="#BCAAA4" class="pa-2">
-                  rate: {{transformedData.details.rate}}
-                </v-card>
-              </v-col>
-              <v-col cols="4" offset="2" style="text-align: center">
-                <v-card color="#BCAAA4" class="pa-2">
-                  opinions: {{transformedData.details.opinions}}
-                </v-card>
-              </v-col>
-            </v-row>
+            <div v-for="details in transformedData.details" :key="details.index">
+              <v-row>
+                <v-col cols="8" offset="2" style="text-align: center">
+                  <v-card color="#BCAAA4" class="pa-2">
+                    {{details.name}}
+                  </v-card>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="4" offset="1" style="text-align: center">
+                  <v-card color="#BCAAA4" class="pa-2">
+                    rate: {{details.rate}}
+                  </v-card>
+                </v-col>
+                <v-col cols="4" offset="2" style="text-align: center">
+                  <v-card color="#BCAAA4" class="pa-2">
+                    opinions: {{details.opinions}}
+                  </v-card>
+                </v-col>
+              </v-row>
+            </div>
           </v-card>
         </v-col>
         <v-col cols="6">
@@ -194,7 +196,12 @@
   <ExtractInfo
     :extractInfoVisibility.sync="extractInfoVisibility"
     :extractedDataDetails="extractedDataDetails"
-    v-on:closeDialog="closeDialog"
+    v-on:closeExtractDialog="closeExtractDialog"
+  />
+  <LoadInfo
+    :loadInfoVisibility.sync="loadInfoVisibility"
+    :loadedDataDetails="loadedDataDetails"
+    v-on:closeLoadDialog="closeLoadDialog"
   />
 </v-container>
 </template>
@@ -204,15 +211,17 @@ import db from '../database/firebaseInit'
 import ScrapeService from '../services/ScrapeService'
 import Functions from '../libs/helperFunctions'
 import ExtractInfo from '../components/ExtractInfo'
+import LoadInfo from '../components/LoadInfo'
 export default {
   name: 'Dashboard',
-  components: { ExtractInfo },
+  components: { LoadInfo, ExtractInfo },
   data () {
     return {
-      responseDetails: null,
+      responseDetails: [],
       responseShops: [],
       responseComments: [],
       extractInfoVisibility: false,
+      loadInfoVisibility: false,
       functions: new Functions(),
       scrapeService: new ScrapeService(),
       extractedData: null,
@@ -220,23 +229,16 @@ export default {
         shopsQuantity: null,
         commentsQuantity: null
       },
+      loadedDataDetails: {
+        shopsQuantity: null,
+        commentsQuantity: null,
+        newShopObjects: null,
+        newCommentObjects: null
+      },
       transformedData: null
     }
   },
   methods: {
-    testing () {
-      let arr1 = [
-        'auto',
-        'auto'
-      ]
-      let arr2 = [
-        'auto',
-        'auto'
-      ]
-      let arr3 = this.arrayUnique(arr1.concat(arr2))
-      console.log(arr3)
-      console.log('dupa')
-    },
     arrayUniqueShops (array) {
       let a = array.concat()
       for (let i = 0; i < a.length; ++i) {
@@ -259,22 +261,28 @@ export default {
       }
       return a
     },
+    arrayUniqueDetails (array) {
+      let a = array.concat()
+      for (let i = 0; i < a.length; ++i) {
+        for (let j = i + 1; j < a.length; ++j) {
+          if (a[i].name === a[j].name) {
+            a.splice(j--, 1)
+          }
+        }
+      }
+      return a
+    },
     async loadData () {
       await db.firestore().collection('details').get()
         .then(querySnapshot => {
           querySnapshot.forEach(doc => {
-            this.responseDetails = {
-              name: doc.data().name,
-              rate: doc.data().rate,
-              opinions: doc.data().opinions
-            }
+            this.responseDetails.push(doc.data())
             doc.ref.delete()
           })
         })
-      await db.firestore().collection('details').add({
-        name: this.transformedData.details.name,
-        rate: this.transformedData.details.rate,
-        opinions: this.transformedData.details.opinions
+      let filteredDetails = this.arrayUniqueDetails(this.transformedData.details.concat(this.responseDetails))
+      filteredDetails.forEach(details => {
+        db.firestore().collection('details').add(details)
       })
       await db.firestore().collection('shops').get()
         .then(querySnapshot => {
@@ -284,6 +292,8 @@ export default {
           })
         })
       let filteredShops = this.arrayUniqueShops(this.transformedData.shops.concat(this.responseShops))
+      this.loadedDataDetails.shopsQuantity = filteredShops.length
+      this.loadedDataDetails.newShopObjects = filteredShops.length - this.transformedData.shops.length
       filteredShops.forEach(shop => {
         db.firestore().collection('shops').add(shop)
       })
@@ -295,6 +305,8 @@ export default {
           })
         })
       let filteredComments = this.arrayUniqueComments(this.transformedData.comments.concat(this.responseComments))
+      this.loadedDataDetails.commentsQuantity = filteredComments.length
+      this.loadedDataDetails.newCommentObjects = filteredComments.length - this.transformedData.comments.length
       filteredComments.forEach(comment => {
         db.firestore().collection('comments').add(comment)
       })
@@ -304,10 +316,15 @@ export default {
     async extractData () {
       this.extractedData = await this.scrapeService.getPage()
     },
-    closeDialog (value) {
+    closeExtractDialog (value) {
       this.extractInfoVisibility = value
       this.extractedDataDetails.shopsQuantity = null
       this.extractedDataDetails.commentsQuantity = null
+    },
+    closeLoadDialog (value) {
+      this.loadInfoVisibility = value
+      this.loadedDataDetails.shopsQuantity = null
+      this.loadedDataDetails.commentsQuantity = null
     },
     transformData () {
       let extractedData = this.extractedData
@@ -327,8 +344,8 @@ export default {
         this.extractedDataDetails.commentsQuantity = value.comments.length
       }
     },
-    'transformedData' (value) {
-      console.log(value.details)
+    'loadedDataDetails' (value) {
+      console.log(value)
     }
   }
 }

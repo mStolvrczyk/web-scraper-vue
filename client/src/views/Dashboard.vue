@@ -42,7 +42,7 @@
       <div class="text-center pa-2">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn @click="extractTransformLoadData" rounded v-on="on">
+            <v-btn @click="extractTransformLoadData(), etlInfoVisibility = true" rounded v-on="on">
               <span style="font-size: 20px" class="brown-1--text font-weight-bold">ETL</span>
             </v-btn>
           </template>
@@ -203,6 +203,11 @@
     :loadedDataDetails="loadedDataDetails"
     v-on:closeLoadDialog="closeLoadDialog"
   />
+  <EtlInfo
+    :etlInfoVisibility.sync="etlInfoVisibility"
+    :etlDataDetails="etlDataDetails"
+    v-on:closeEtlDialog="closeEtlDialog"
+  />
 </v-container>
 </template>
 
@@ -212,9 +217,10 @@ import ScrapeService from '../services/ScrapeService'
 import Functions from '../libs/helperFunctions'
 import ExtractInfo from '../components/ExtractInfo'
 import LoadInfo from '../components/LoadInfo'
+import EtlInfo from '../components/EtlInfo'
 export default {
   name: 'Dashboard',
-  components: { LoadInfo, ExtractInfo },
+  components: { EtlInfo, LoadInfo, ExtractInfo },
   data () {
     return {
       responseDetails: [],
@@ -222,6 +228,7 @@ export default {
       responseComments: [],
       extractInfoVisibility: false,
       loadInfoVisibility: false,
+      etlInfoVisibility: false,
       functions: new Functions(),
       scrapeService: new ScrapeService(),
       extractedData: null,
@@ -236,7 +243,24 @@ export default {
       },
       transformedData: null,
       extractedDataETL: null,
-      transformedDataETL: null
+      transformedDataETL: null,
+      etlDataDetails: {
+        extractedData: {
+          details: null,
+          shops: null,
+          comments: null
+        },
+        transformedData: {
+          details: null,
+          shops: null,
+          comments: null
+        },
+        loadedData: {
+          details: null,
+          shops: null,
+          comments: null
+        }
+      }
     }
   },
   methods: {
@@ -285,9 +309,15 @@ export default {
       filteredComments.forEach(comment => {
         db.firestore().collection('comments').add(comment)
       })
-      console.log(filteredShops.length)
-      console.log(this.responseShops.length)
-      console.log(this.subtraction(filteredShops.length, this.responseShops.length))
+      this.etlDataDetails.extractedData.details = extractedData.details.length
+      this.etlDataDetails.extractedData.shops = extractedData.shops.length
+      this.etlDataDetails.extractedData.comments = extractedData.comments.length
+      this.etlDataDetails.transformedData.details = this.transformedDataETL.details.length
+      this.etlDataDetails.transformedData.shops = this.transformedDataETL.shops.length
+      this.etlDataDetails.transformedData.comments = this.transformedDataETL.comments.length
+      this.etlDataDetails.loadedData.details = this.loadedDataDetails.newDetailsObjects
+      this.etlDataDetails.loadedData.shops = this.loadedDataDetails.newShopObjects
+      this.etlDataDetails.loadedData.comments = this.loadedDataDetails.newCommentObjects
       this.transformedDataETL = null
       this.responseDetails = []
       this.responseShops = []
@@ -392,6 +422,18 @@ export default {
       this.loadedDataDetails.newDetailsObjects = null
       this.loadedDataDetails.newShopObjects = null
       this.loadedDataDetails.newCommentObjectsObjects = null
+    },
+    closeEtlDialog (value) {
+      this.etlInfoVisibility = value
+      this.etlDataDetails.extractedData.details = null
+      this.etlDataDetails.extractedData.shops = null
+      this.etlDataDetails.extractedData.comments = null
+      this.etlDataDetails.transformedData.details = null
+      this.etlDataDetails.transformedData.shops = null
+      this.etlDataDetails.transformedData.comments = null
+      this.etlDataDetails.loadedData.details = null
+      this.etlDataDetails.loadedData.shops = null
+      this.etlDataDetails.loadedData.comments = null
     },
     transformData () {
       let extractedData = this.extractedData

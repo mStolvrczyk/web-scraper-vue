@@ -4,25 +4,6 @@
     <v-col cols="8" offset="2">
       <v-card class="pa-2">
         <v-card-text style="font-size: 20px" class="darken-1--text font-weight-bold" align="center">Konsola Nintendo Switch Joy-Con 32GB Niebiesko-czerwony</v-card-text>
-<!--        <v-row>-->
-<!--          <v-col cols="10" offset="1" style="text-align: center">-->
-<!--            <v-card color="#BCAAA4" class="pa-2">-->
-<!--              {{scrapeData.details.name}}-->
-<!--            </v-card>-->
-<!--          </v-col>-->
-<!--        </v-row>-->
-<!--        <v-row>-->
-<!--          <v-col cols="4" offset="1" style="text-align: center">-->
-<!--            <v-card color="#BCAAA4" class="pa-2">-->
-<!--              rate: {{scrapeData.details.rate}}-->
-<!--            </v-card>-->
-<!--          </v-col>-->
-<!--          <v-col cols="4" offset="2" style="text-align: center">-->
-<!--            <v-card color="#BCAAA4" class="pa-2">-->
-<!--              opinions: {{scrapeData.details.opinions}}-->
-<!--            </v-card>-->
-<!--          </v-col>-->
-<!--        </v-row>-->
       </v-card>
       <div class="text-center pa-2">
         <v-btn-toggle rounded>
@@ -45,23 +26,23 @@
             </template>
             <span>Transform</span>
           </v-tooltip>
-          <v-btn disabled color="white">
+          <v-btn v-if="transformedData === null" disabled color="white">
             <span style="font-size: 20px" class="brown-1--text font-weight-bold">L</span>
           </v-btn>
-<!--          <v-tooltip v-else bottom>-->
-<!--            <template v-slot:activator="{ on }">-->
-<!--              <v-btn color="white" v-on="on">-->
-<!--                <span style="font-size: 20px" class="brown-1&#45;&#45;text font-weight-bold">L</span>-->
-<!--              </v-btn>-->
-<!--            </template>-->
-<!--            <span>Load</span>-->
-<!--          </v-tooltip>-->
+          <v-tooltip v-else bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn @click="loadData(), loadInfoVisibility = true" color="white" v-on="on">
+                <span style="font-size: 20px" class="brown-1--text font-weight-bold">L</span>
+              </v-btn>
+            </template>
+            <span>Load</span>
+          </v-tooltip>
         </v-btn-toggle>
       </div>
       <div class="text-center pa-2">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn rounded v-on="on">
+            <v-btn @click="extractTransformLoadData" rounded v-on="on">
               <span style="font-size: 20px" class="brown-1--text font-weight-bold">ETL</span>
             </v-btn>
           </template>
@@ -123,30 +104,32 @@
 <!--    </v-col>-->
 <!--  </v-row>-->
   <transition name="popup">
-    <div v-if="transformDataVisibility" align="center">
+    <div v-if="transformedData !== null" align="center">
       <v-row>
         <v-col cols="6">
           <v-card class="ma-4">
             <v-card-text style="font-size: 18px" class="darken-1--text font-weight-bold" align="center">DETAILS</v-card-text>
-            <v-row>
-              <v-col cols="8" offset="2" style="text-align: center">
-                <v-card color="#BCAAA4" class="pa-2">
-                  {{transformedData.details.name}}
-                </v-card>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="4" offset="1" style="text-align: center">
-                <v-card color="#BCAAA4" class="pa-2">
-                  rate: {{transformedData.details.rate}}
-                </v-card>
-              </v-col>
-              <v-col cols="4" offset="2" style="text-align: center">
-                <v-card color="#BCAAA4" class="pa-2">
-                  opinions: {{transformedData.details.opinions}}
-                </v-card>
-              </v-col>
-            </v-row>
+            <div v-for="details in transformedData.details" :key="details.index">
+              <v-row>
+                <v-col cols="8" offset="2" style="text-align: center">
+                  <v-card color="#BCAAA4" class="pa-2">
+                    {{details.name}}
+                  </v-card>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="4" offset="1" style="text-align: center">
+                  <v-card color="#BCAAA4" class="pa-2">
+                    rate: {{details.rate}}
+                  </v-card>
+                </v-col>
+                <v-col cols="4" offset="2" style="text-align: center">
+                  <v-card color="#BCAAA4" class="pa-2">
+                    opinions: {{details.opinions}}
+                  </v-card>
+                </v-col>
+              </v-row>
+            </div>
           </v-card>
         </v-col>
         <v-col cols="6">
@@ -213,22 +196,32 @@
   <ExtractInfo
     :extractInfoVisibility.sync="extractInfoVisibility"
     :extractedDataDetails="extractedDataDetails"
-    v-on:closeDialog="closeDialog"
+    v-on:closeExtractDialog="closeExtractDialog"
+  />
+  <LoadInfo
+    :loadInfoVisibility.sync="loadInfoVisibility"
+    :loadedDataDetails="loadedDataDetails"
+    v-on:closeLoadDialog="closeLoadDialog"
   />
 </v-container>
 </template>
 
 <script>
+import db from '../database/firebaseInit'
 import ScrapeService from '../services/ScrapeService'
 import Functions from '../libs/helperFunctions'
 import ExtractInfo from '../components/ExtractInfo'
+import LoadInfo from '../components/LoadInfo'
 export default {
   name: 'Dashboard',
-  components: { ExtractInfo },
+  components: { LoadInfo, ExtractInfo },
   data () {
     return {
+      responseDetails: [],
+      responseShops: [],
+      responseComments: [],
       extractInfoVisibility: false,
-      transformDataVisibility: false,
+      loadInfoVisibility: false,
       functions: new Functions(),
       scrapeService: new ScrapeService(),
       extractedData: null,
@@ -236,45 +229,187 @@ export default {
         shopsQuantity: null,
         commentsQuantity: null
       },
-      transformedData: {
-        details: {
-          name: null,
-          rate: null,
-          opinions: null
-        },
-        shops: null,
-        shopsQuantity: null,
-        comments: [],
-        commentsQuantity: null
-      }
+      loadedDataDetails: {
+        newDetailsObjects: null,
+        newShopObjects: null,
+        newCommentObjects: null
+      },
+      transformedData: null,
+      extractedDataETL: null,
+      transformedDataETL: null
     }
   },
   methods: {
+    async extractTransformLoadData () {
+      let extractedData = await this.scrapeService.getPage()
+      this.transformedDataETL = {
+        details: extractedData.details.map(this.functions.transformDetails),
+        shops: extractedData.shops.map(this.functions.transformShops),
+        shopsQuantity: extractedData.shops.length,
+        comments: extractedData.comments.map(this.functions.transformComments),
+        commentsQuantity: extractedData.comments.length
+      }
+      await db.firestore().collection('details').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            this.responseDetails.push(doc.data())
+            doc.ref.delete()
+          })
+        })
+      let filteredDetails = this.arrayUniqueDetails(this.transformedDataETL.details.concat(this.responseDetails))
+      this.loadedDataDetails.newDetailsObjects = this.subtraction(filteredDetails.length, this.responseDetails.length)
+      filteredDetails.forEach(details => {
+        db.firestore().collection('details').add(details)
+      })
+      await db.firestore().collection('shops').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            this.responseShops.push(doc.data())
+            doc.ref.delete()
+          })
+        })
+      let filteredShops = this.arrayUniqueShops(this.transformedDataETL.shops.concat(this.responseShops))
+      this.loadedDataDetails.newShopObjects = this.subtraction(filteredShops.length, this.responseShops.length)
+      filteredShops.forEach(shop => {
+        db.firestore().collection('shops').add(shop)
+      })
+      await db.firestore().collection('comments').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            this.responseComments.push(doc.data())
+            doc.ref.delete()
+          })
+        })
+      let filteredComments = this.arrayUniqueComments(this.transformedDataETL.comments.concat(this.responseComments))
+      this.loadedDataDetails.newCommentObjects = this.subtraction(filteredComments.length, this.responseComments.length)
+      filteredComments.forEach(comment => {
+        db.firestore().collection('comments').add(comment)
+      })
+      console.log(filteredShops.length)
+      console.log(this.responseShops.length)
+      console.log(this.subtraction(filteredShops.length, this.responseShops.length))
+      this.transformedDataETL = null
+      this.responseDetails = []
+      this.responseShops = []
+      this.responseComments = []
+    },
+    subtraction (a, b) {
+      if (a - b >= 0) {
+        return a - b
+      } else {
+        return 0
+      }
+    },
+    arrayUniqueShops (array) {
+      let a = array.concat()
+      for (let i = 0; i < a.length; ++i) {
+        for (let j = i + 1; j < a.length; ++j) {
+          if (a[i].shopName === a[j].shopName) {
+            a.splice(j--, 1)
+          }
+        }
+      }
+      return a
+    },
+    arrayUniqueComments (array) {
+      let a = array.concat()
+      for (let i = 0; i < a.length; ++i) {
+        for (let j = i + 1; j < a.length; ++j) {
+          if (a[i].content === a[j].content) {
+            a.splice(j--, 1)
+          }
+        }
+      }
+      return a
+    },
+    arrayUniqueDetails (array) {
+      let a = array.concat()
+      for (let i = 0; i < a.length; ++i) {
+        for (let j = i + 1; j < a.length; ++j) {
+          if (a[i].name === a[j].name) {
+            a.splice(j--, 1)
+          }
+        }
+      }
+      return a
+    },
+    async loadData () {
+      await db.firestore().collection('details').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            this.responseDetails.push(doc.data())
+            doc.ref.delete()
+          })
+        })
+      let filteredDetails = this.arrayUniqueDetails(this.transformedData.details.concat(this.responseDetails))
+      this.loadedDataDetails.newDetailsObjects = this.subtraction(filteredDetails.length, this.responseDetails.length)
+      filteredDetails.forEach(details => {
+        db.firestore().collection('details').add(details)
+      })
+      await db.firestore().collection('shops').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            this.responseShops.push(doc.data())
+            doc.ref.delete()
+          })
+        })
+      let filteredShops = this.arrayUniqueShops(this.transformedData.shops.concat(this.responseShops))
+      this.loadedDataDetails.newShopObjects = this.subtraction(filteredShops.length, this.responseShops.length)
+      filteredShops.forEach(shop => {
+        db.firestore().collection('shops').add(shop)
+      })
+      await db.firestore().collection('comments').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            this.responseComments.push(doc.data())
+            doc.ref.delete()
+          })
+        })
+      let filteredComments = this.arrayUniqueComments(this.transformedData.comments.concat(this.responseComments))
+      this.loadedDataDetails.newCommentObjects = this.subtraction(filteredComments.length, this.responseComments.length)
+      filteredComments.forEach(comment => {
+        db.firestore().collection('comments').add(comment)
+      })
+      console.log(filteredShops.length)
+      console.log(this.responseShops.length)
+      console.log(this.subtraction(filteredShops.length, this.responseShops.length))
+      this.extractedData = null
+      this.transformedData = null
+      this.responseDetails = []
+      this.responseShops = []
+      this.responseComments = []
+    },
     async extractData () {
       this.extractedData = await this.scrapeService.getPage()
     },
-    closeDialog (value) {
+    closeExtractDialog (value) {
       this.extractInfoVisibility = value
       this.extractedDataDetails.shopsQuantity = null
       this.extractedDataDetails.commentsQuantity = null
     },
+    closeLoadDialog (value) {
+      this.loadInfoVisibility = value
+      this.loadedDataDetails.newDetailsObjects = null
+      this.loadedDataDetails.newShopObjects = null
+      this.loadedDataDetails.newCommentObjectsObjects = null
+    },
     transformData () {
-      this.transformDataVisibility = true
       let extractedData = this.extractedData
-      this.transformedData.details.name = extractedData.details.name
-      this.transformedData.details.rate = extractedData.details.rate
-      this.transformedData.details.opinions = extractedData.details.opinions
-      this.transformedData.shops = extractedData.shops.map(this.functions.transformShops)
-      this.transformedData.shopsQuantity = this.transformedData.shops.length
-      this.transformedData.comments = extractedData.comments.map(this.functions.transformComments)
-      this.transformedData.commentsQuantity = this.transformedData.comments.length
-      console.log(this.transformedData)
+      this.transformedData = {
+        details: extractedData.details.map(this.functions.transformDetails),
+        shops: extractedData.shops.map(this.functions.transformShops),
+        shopsQuantity: extractedData.shops.length,
+        comments: extractedData.comments.map(this.functions.transformComments),
+        commentsQuantity: extractedData.comments.length
+      }
     }
   },
   watch: {
     'extractedData' (value) {
-      this.extractedDataDetails.shopsQuantity = value.shops.length
-      this.extractedDataDetails.commentsQuantity = value.comments.length
+      if (value !== null) {
+        this.extractedDataDetails.shopsQuantity = value.shops.length
+        this.extractedDataDetails.commentsQuantity = value.comments.length
+      }
     }
   }
 }

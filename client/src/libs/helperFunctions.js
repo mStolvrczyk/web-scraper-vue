@@ -15,4 +15,11 @@ export default class Functions {
       disadvantages: disadvantages.length === 0 ? ['brak informacji'] : disadvantages
     }
   }
+  transformDetails ({ name, rate, opinions }) {
+    return {
+      name,
+      rate,
+      opinions
+    }
+  }
 }

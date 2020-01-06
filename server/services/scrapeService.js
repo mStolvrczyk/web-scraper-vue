@@ -5,19 +5,27 @@ const cheerio = require('cheerio')
 module.exports = {
     scrapePage: async () => {
         let shops = []
-        let details = {}
+        let details = []
         let comments = []
+        await axios.get('https://www.ceneo.pl/49541116/opinie-1')
+            .then(functions.getData)
+            .then((data) => {
+                const $ = cheerio.load(data)
+                const siteHeading = $('.product-content')
+                let name = siteHeading.find('.product-name').text()
+                let rate = siteHeading.find('.product-score').text().substring(0, 3)
+                let opinions = siteHeading.find('.product-reviews-link').children('span').text()
+                details.push({
+                    name,
+                    rate,
+                    opinions
+                })
+            })
         for (let i = 1; i < 4; i++) {
             await axios.get(`https://www.ceneo.pl/49541116/opinie-${i}`)
                 .then(functions.getData)
                 .then((data) => {
                     const $ = cheerio.load(data)
-                    const siteHeading = $('.product-content')
-                    details =  {
-                        name: siteHeading.find('.product-name').text(),
-                        rate: siteHeading.find('.product-score').text().substring(0, 3),
-                        opinions: siteHeading.find('.product-reviews-link').children('span').text()
-                    }
                     const commentsWrapper = $('.product-reviews')
                     commentsWrapper.find('.review-box').each((i, el) => {
                         let advantages = []

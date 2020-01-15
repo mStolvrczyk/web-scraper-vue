@@ -85,7 +85,7 @@
                     <v-card width="400px" class="my-3" color="#BCAAA4">
                       <v-card-text style="font-size: 15px" class="darken-1--text font-weight-bold" align="center">{{shop.shopName
                         }}</v-card-text>
-                      <v-card-text style="font-size: 15px" class="darken-1--text font-weight-bold" align="center">price: {{shop.price}}</v-card-text>
+                      <v-card-text style="font-size: 15px" class="darken-1--text font-weight-bold" align="center">price: {{shop.price+' zł'}}</v-card-text>
                     </v-card>
                     <v-tooltip bottom>
                       <template v-slot:activator="{ on }">

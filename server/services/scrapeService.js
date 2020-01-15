@@ -13,7 +13,7 @@ module.exports = {
                 const $ = cheerio.load(data)
                 const siteHeading = $('.product-content')
                 let name = siteHeading.find('.product-name').text()
-                let rate = siteHeading.find('.product-score').text().substring(0, 3)
+                let rate = siteHeading.find('.product-score').text().substring(0, 3).replace(',','.')
                 let opinions = siteHeading.find('.product-reviews-link').children('span').text()
                 details.push({
                     name,
@@ -35,7 +35,7 @@ module.exports = {
                             recommendation: $(el).find('.product-review-summary').children('em').text(),
                             rate: $(el).find('.review-score-count').text()
                         }
-                        let date = 'Wystawiono '+$(el).find('.review-time').children('time').text()
+                        let date = $(el).find('.review-time').children('time').attr('datetime')+' (Wystawiono '+$(el).find('.review-time').children('time').text()+')'
                         let content = $(el).find('.product-review-body').text()
                         $(el).find('.pros-cell').children('ul').children('li').each((i, el) => {
                             advantages.push($(el).text())
@@ -62,7 +62,7 @@ module.exports = {
                 const siteHeading = $('.product-offers-group')
                 siteHeading.find('.product-offer').each((i, el) => {
                     let shopName = $(el).children('.cell-store-logo').children('a').children('img').attr('alt')
-                    let price = $(el).children('.cell-price').children('a').children('span').children('span').children('span').text()+' zł'
+                    let price = $(el).children('.cell-price').children('a').children('span').children('span').children('span').text().replace(',','.')+' zł'
                     shops.push({
                         shopName,
                         price

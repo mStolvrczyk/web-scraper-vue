@@ -2,13 +2,13 @@ export default class Functions {
   transformShops ({ shopName, price }) {
     return {
       shopName,
-      price
+      price: parseFloat(price.replace(' zł', ''))
     }
   }
   transformComments ({ author, date, rating, content, advantages, disadvantages }) {
     return {
-      author,
-      date,
+      author: author.replace(' ', ''),
+      date: date.substring(0, 16),
       rating,
       content,
       advantages: advantages.length === 0 ? ['brak informacji'] : advantages,
@@ -17,9 +17,9 @@ export default class Functions {
   }
   transformDetails ({ name, rate, opinions }) {
     return {
-      name,
-      rate,
-      opinions
+      name: name.replace(' ', ''),
+      rate: parseFloat(rate),
+      opinions: parseInt(opinions)
     }
   }
 }

@@ -88,7 +88,7 @@
                           :key="shop.index">
                     <v-card-text style="font-size: 15px" class="darken-1--text font-weight-bold" align="center">{{shop.shopName
                       }}</v-card-text>
-                    <v-card-text style="font-size: 15px" class="darken-1--text font-weight-bold" align="center">price: {{shop.price}}</v-card-text>
+                    <v-card-text style="font-size: 15px" class="darken-1--text font-weight-bold" align="center">price: {{shop.price+' zł'}}</v-card-text>
                   </v-card>
             </v-card>
           </v-card>
@@ -389,6 +389,7 @@ export default {
         comments: extractedData.comments.map(this.functions.transformComments),
         commentsQuantity: extractedData.comments.length
       }
+      console.log(this.transformedData)
     }
   },
   watch: {

@@ -15,6 +15,17 @@ export default class Functions {
       disadvantages: disadvantages.length === 0 ? ['brak informacji'] : disadvantages
     }
   }
+  transformCommentsToExport ({ author, date, rating, content, advantages, disadvantages }) {
+    return {
+      author: author.replace(' ', ''),
+      date: date.substring(0, 16),
+      content,
+      recommendation: rating.recommendation,
+      rate: rating.rate,
+      advantages: advantages.join(', '),
+      disadvantages: disadvantages.join(', ')
+    }
+  }
   transformDetails ({ name, rate, opinions }) {
     return {
       name: name.replace(' ', ''),

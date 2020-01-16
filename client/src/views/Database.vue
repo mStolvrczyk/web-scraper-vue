@@ -210,6 +210,11 @@
                 </template>
                 <span>Export comments</span>
               </v-tooltip>
+              <JsonCSV
+                class   = "btn btn-default"
+                :data   = "transformedComments"
+                name    = "filename.csv">
+              </JsonCSV>
             </v-col>
           </v-row>
         </div>
@@ -234,10 +239,39 @@
 
 <script>
 import db from '../database/firebaseInit'
+import JsonCSV from 'vue-json-csv'
+import Functions from '../libs/helperFunctions'
 export default {
   name: 'Database',
+  components: {
+    JsonCSV
+  },
   data () {
     return {
+      functions: new Functions(),
+      transformedComments: null,
+      json_data: [
+        {
+          'name': 'Tony Peña',
+          'city': 'New York',
+          'country': 'United States',
+          'birthdate': '1978-03-15',
+          'phone': {
+            'mobile': '1-541-754-3010',
+            'landline': '(541) 754-3010'
+          }
+        },
+        {
+          'name': 'Thessaloniki',
+          'city': 'Athens',
+          'country': 'Greece',
+          'birthdate': '1987-11-23',
+          'phone': {
+            'mobile': '+1 855 275 5071',
+            'landline': '(2741) 2621-244'
+          }
+        }
+      ],
       responseDetails: null,
       responseShops: null,
       responseComments: null,
@@ -302,19 +336,19 @@ export default {
       this.getData()
     },
     csvExport (arrData) {
-      let csvContent = 'data:text/csv;charset=utf-8,'
-      csvContent += [
-        Object.keys(arrData[0]).join(';'),
-        ...arrData.map(item => Object.values(item).join(';'))
-      ]
-        .join('\n')
-        .replace(/(^\[)|(\]$)/gm, '')
-
-      const data = encodeURI(csvContent)
-      const link = document.createElement('a')
-      link.setAttribute('href', data)
-      link.setAttribute('download', 'export.csv')
-      link.click()
+      // let csvContent = 'data:text/csv;charset=utf-8,'
+      // csvContent += [
+      //   Object.keys(arrData[0]).join(';'),
+      //   ...arrData.map(item => Object.values(item).join(';'))
+      // ]
+      //   .join('\n')
+      //   .replace(/(^\[)|(\]$)/gm, '')
+      //
+      // const data = encodeURI(csvContent)
+      // const link = document.createElement('a')
+      // link.setAttribute('href', data)
+      // link.setAttribute('download', 'export.csv')
+      // link.click()
     },
     async deleteDetails (id) {
       await db.firestore().collection('details').get()
@@ -384,6 +418,8 @@ export default {
       if (this.responseComments.length === 0) {
         this.responseComments = null
       }
+      this.transformedComments = this.responseComments.map(this.functions.transformCommentsToExport)
+      console.log(this.transformedComments)
     }
   },
   mounted () {

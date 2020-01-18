@@ -60,8 +60,12 @@
               </v-card>
               <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
-                  <v-btn @click="csvExport(responseDetails)" class="mx-2" fab small color="blue" v-on="on">
-                    <v-icon style="color: white">mdi-database-export</v-icon>
+                  <v-btn fab small color="blue" v-on="on">
+                    <JsonCSV
+                      :data   = "transformedDetails"
+                      name    = "details.csv">
+                      <v-icon style="color: white">mdi-database-export</v-icon>
+                    </JsonCSV>
                   </v-btn>
                 </template>
                 <span>Export details</span>
@@ -95,33 +99,51 @@
                       </template>
                       <span>Delete shop</span>
                     </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn fab small color="blue" v-on="on">
+                          <JsonCSV
+                            :data   = "[functions.transformSingleShop(shop)]"
+                            name    = "shop.csv">
+                            <v-icon style="color: white">mdi-database-export</v-icon>
+                          </JsonCSV>
+                        </v-btn>
+                      </template>
+                      <span>Export shop</span>
+                    </v-tooltip>
                   </div>
                 </v-card>
               </v-card>
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <v-btn @click="sortShops(false)" class="mx-2" fab small color="green" v-on="on">
-                    <v-icon style="color: white">mdi-sort-ascending</v-icon>
-                  </v-btn>
-                </template>
-                <span>Sort by price ascending</span>
-              </v-tooltip>
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <v-btn @click="sortShops(true)" class="mx-2" fab small color="green" v-on="on">
-                    <v-icon style="color: white">mdi-sort-descending</v-icon>
-                  </v-btn>
-                </template>
-                <span>Sort by price descending</span>
-              </v-tooltip>
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <v-btn @click="csvExport(responseShops)" class="mx-2" fab small color="blue" v-on="on">
-                    <v-icon style="color: white">mdi-database-export</v-icon>
-                  </v-btn>
-                </template>
-                <span>Export shops</span>
-              </v-tooltip>
+              <v-btn-toggle rounded>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                    <v-btn @click="sortShops(false)" fab small color="green" v-on="on">
+                      <v-icon style="color: white">mdi-sort-ascending</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Sort by price ascending</span>
+                </v-tooltip>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                    <v-btn fab small color="blue" v-on="on">
+                      <JsonCSV
+                        :data   = "transformedShops"
+                        name    = "shops.csv">
+                        <v-icon style="color: white">mdi-database-export</v-icon>
+                      </JsonCSV>
+                    </v-btn>
+                  </template>
+                  <span>Export shops</span>
+                </v-tooltip>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                    <v-btn @click="sortShops(true)" fab small color="green" v-on="on">
+                      <v-icon style="color: white">mdi-sort-descending</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Sort by price descending</span>
+                </v-tooltip>
+              </v-btn-toggle>
             </v-col>
           </v-row>
           <v-row>
@@ -183,38 +205,51 @@
                       </template>
                       <span>Delete comment</span>
                     </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn fab small color="blue" v-on="on">
+                          <JsonCSV
+                            :data   = "[functions.transformSingleComment(comment)]"
+                            name    = "comment.csv">
+                            <v-icon style="color: white">mdi-database-export</v-icon>
+                          </JsonCSV>
+                        </v-btn>
+                      </template>
+                      <span>Export comment</span>
+                    </v-tooltip>
                   </div>
                 </v-card>
               </v-card>
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <v-btn @click="sortComments(false)" class="mx-2" fab small color="green" v-on="on">
-                    <v-icon style="color: white">mdi-sort-ascending</v-icon>
-                  </v-btn>
-                </template>
-                <span>Sort by rate ascending</span>
-              </v-tooltip>
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <v-btn @click="sortComments(true)" class="mx-2" fab small color="green" v-on="on">
-                    <v-icon style="color: white">mdi-sort-descending</v-icon>
-                  </v-btn>
-                </template>
-                <span>Sort by rate descending</span>
-              </v-tooltip>
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <v-btn @click="csvExport(responseComments)" class="mx-2" fab small color="blue" v-on="on">
-                    <v-icon style="color: white">mdi-database-export</v-icon>
-                  </v-btn>
-                </template>
-                <span>Export comments</span>
-              </v-tooltip>
-              <JsonCSV
-                class   = "btn btn-default"
-                :data   = "transformedComments"
-                name    = "filename.csv">
-              </JsonCSV>
+              <v-btn-toggle rounded>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                    <v-btn @click="sortComments(false)" fab small color="green" v-on="on">
+                      <v-icon style="color: white">mdi-sort-ascending</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Sort by rate ascending</span>
+                </v-tooltip>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                  <v-btn fab small color="blue" v-on="on">
+                    <JsonCSV
+                      :data   = "transformedComments"
+                      name    = "comments.csv">
+                            <v-icon style="color: white">mdi-database-export</v-icon>
+                    </JsonCSV>
+                    </v-btn>
+                  </template>
+                  <span>Export comments</span>
+                </v-tooltip>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                    <v-btn @click="sortComments(true)" fab small color="green" v-on="on">
+                      <v-icon style="color: white">mdi-sort-descending</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Sort by rate descending</span>
+                </v-tooltip>
+              </v-btn-toggle>
             </v-col>
           </v-row>
         </div>
@@ -248,141 +283,17 @@ export default {
   },
   data () {
     return {
-      functions: new Functions(),
-      transformedComments: null,
-      json_data: [
-        {
-          'name': 'Tony Peña',
-          'city': 'New York',
-          'country': 'United States',
-          'birthdate': '1978-03-15',
-          'phone': {
-            'mobile': '1-541-754-3010',
-            'landline': '(541) 754-3010'
-          }
-        },
-        {
-          'name': 'Thessaloniki',
-          'city': 'Athens',
-          'country': 'Greece',
-          'birthdate': '1987-11-23',
-          'phone': {
-            'mobile': '+1 855 275 5071',
-            'landline': '(2741) 2621-244'
-          }
-        }
-      ],
       responseDetails: null,
       responseShops: null,
       responseComments: null,
+      transformedDetails: [],
+      transformedShops: [],
+      transformedComments: [],
+      functions: new Functions(),
       circularVisibility: false
     }
   },
   methods: {
-    async sortShops (descending) {
-      this.responseShops = []
-      let shopsSnapshot = await db.firestore().collection('shops').get()
-      this.responseShops = shopsSnapshot.docs.map((doc) => {
-        return {
-          ...doc.data(),
-          id: doc.id
-        }
-      })
-      this.responseShops.sort(function (a, b) {
-        return a.price.slice(0, 4) - b.price.slice(0, 4)
-      })
-      if (descending) {
-        this.responseShops.reverse()
-      }
-    },
-    async sortComments (descending) {
-      this.responseComments = []
-      let shopsSnapshot = await db.firestore().collection('comments').get()
-      this.responseComments = shopsSnapshot.docs.map((doc) => {
-        return {
-          ...doc.data(),
-          id: doc.id
-        }
-      })
-      this.responseComments.sort(function (a, b) {
-        return a.rating.rate.slice(0, 1) - b.rating.rate.slice(0, 1)
-      })
-      if (descending) {
-        this.responseComments.reverse()
-      }
-    },
-    async clearDatabase () {
-      await db.firestore().collection('details').get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(doc => {
-            doc.ref.delete()
-          })
-        })
-      await db.firestore().collection('shops').get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(doc => {
-            doc.ref.delete()
-          })
-        })
-      await db.firestore().collection('comments').get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(doc => {
-            doc.ref.delete()
-          })
-        })
-      this.responseDetails = null
-      this.responseShops = null
-      this.responseComments = null
-      this.getData()
-    },
-    csvExport (arrData) {
-      // let csvContent = 'data:text/csv;charset=utf-8,'
-      // csvContent += [
-      //   Object.keys(arrData[0]).join(';'),
-      //   ...arrData.map(item => Object.values(item).join(';'))
-      // ]
-      //   .join('\n')
-      //   .replace(/(^\[)|(\]$)/gm, '')
-      //
-      // const data = encodeURI(csvContent)
-      // const link = document.createElement('a')
-      // link.setAttribute('href', data)
-      // link.setAttribute('download', 'export.csv')
-      // link.click()
-    },
-    async deleteDetails (id) {
-      await db.firestore().collection('details').get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(doc => {
-            if (doc.id === id) {
-              doc.ref.delete()
-            }
-          })
-        })
-      this.getData()
-    },
-    async deleteShop (id) {
-      await db.firestore().collection('shops').get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(doc => {
-            if (doc.id === id) {
-              doc.ref.delete()
-            }
-          })
-        })
-      this.getData()
-    },
-    async deleteComment (id) {
-      await db.firestore().collection('comments').get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(doc => {
-            if (doc.id === id) {
-              doc.ref.delete()
-            }
-          })
-        })
-      this.getData()
-    },
     async getData () {
       this.circularVisibility = true
       setTimeout(function () { this.circularVisibility = false }
@@ -418,8 +329,100 @@ export default {
       if (this.responseComments.length === 0) {
         this.responseComments = null
       }
+      this.transformedDetails = this.responseDetails.map(this.functions.transformDetails)
+      this.transformedShops = this.responseShops.map(this.functions.transformShopsToExport)
       this.transformedComments = this.responseComments.map(this.functions.transformCommentsToExport)
-      console.log(this.transformedComments)
+    },
+    async deleteDetails (id) {
+      await db.firestore().collection('details').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            if (doc.id === id) {
+              doc.ref.delete()
+            }
+          })
+        })
+      this.getData()
+    },
+    async deleteShop (id) {
+      await db.firestore().collection('shops').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            if (doc.id === id) {
+              doc.ref.delete()
+            }
+          })
+        })
+      this.getData()
+    },
+    async deleteComment (id) {
+      await db.firestore().collection('comments').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            if (doc.id === id) {
+              doc.ref.delete()
+            }
+          })
+        })
+      this.getData()
+    },
+    async sortShops (descending) {
+      this.responseShops = []
+      let shopsSnapshot = await db.firestore().collection('shops').get()
+      this.responseShops = shopsSnapshot.docs.map((doc) => {
+        return {
+          ...doc.data(),
+          id: doc.id
+        }
+      })
+      this.responseShops.sort(function (a, b) {
+        return a.price - b.price
+      })
+      if (descending) {
+        this.responseShops.reverse()
+      }
+      this.transformedShops = this.responseShops.map(this.functions.transformShopsToExport)
+    },
+    async sortComments (descending) {
+      this.responseComments = []
+      let shopsSnapshot = await db.firestore().collection('comments').get()
+      this.responseComments = shopsSnapshot.docs.map((doc) => {
+        return {
+          ...doc.data(),
+          id: doc.id
+        }
+      })
+      this.responseComments.sort(function (a, b) {
+        return a.rating.rate.slice(0, 1) - b.rating.rate.slice(0, 1)
+      })
+      if (descending) {
+        this.responseComments.reverse()
+      }
+      this.transformedComments = this.responseComments.map(this.functions.transformCommentsToExport)
+    },
+    async clearDatabase () {
+      await db.firestore().collection('details').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            doc.ref.delete()
+          })
+        })
+      await db.firestore().collection('shops').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            doc.ref.delete()
+          })
+        })
+      await db.firestore().collection('comments').get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            doc.ref.delete()
+          })
+        })
+      this.responseDetails = null
+      this.responseShops = null
+      this.responseComments = null
+      this.getData()
     }
   },
   mounted () {

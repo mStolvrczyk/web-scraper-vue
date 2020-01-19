@@ -327,18 +327,12 @@ export default {
           })
         })
       if (detailsConnectionFailed === false) {
-        console.log('response details')
-        console.log(this.responseDetails.length)
         let filteredDetails = this.arrayUniqueDetails(this.transformedData.details.concat(this.responseDetails))
-        console.log('filtered details')
-        console.log(filteredDetails.length)
-        console.log(this.subtraction(filteredDetails.length, this.responseDetails.length))
         this.loadedDataDetails.newDetailsObjects = this.subtraction(filteredDetails.length, this.responseDetails.length)
         filteredDetails.forEach(details => {
           db.firestore().collection('details').add(details)
         })
       }
-      console.log(this.loadedDataDetails)
       await db.firestore().collection('shops').get()
         .then(querySnapshot => {
           shopsConnectionFailed = querySnapshot.metadata.fromCache
@@ -431,6 +425,7 @@ export default {
         comments: extractedData.comments.map(this.functions.transformComments),
         commentsQuantity: extractedData.comments.length
       }
+      console.log(this.transformedData)
     }
   },
   watch: {

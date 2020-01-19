@@ -150,11 +150,13 @@
     :loadInfoVisibility.sync="loadInfoVisibility"
     :loadedDataDetails="loadedDataDetails"
     v-on:closeLoadDialog="closeLoadDialog"
+    v-on:goToDatabase="goToDatabaseFromLoadDialog"
   />
   <EtlInfo
     :etlInfoVisibility.sync="etlInfoVisibility"
     :etlDataDetails="etlDataDetails"
     v-on:closeEtlDialog="closeEtlDialog"
+    v-on:goToDatabase="goToDatabaseFromEtlDialog"
   />
 </v-container>
 </template>
@@ -181,6 +183,7 @@ export default {
       scrapeService: new ScrapeService(),
       extractedData: null,
       extractedDataDetails: {
+        detailsQuantity: null,
         shopsQuantity: null,
         commentsQuantity: null
       },
@@ -312,42 +315,60 @@ export default {
       return a
     },
     async loadData () {
+      let detailsConnectionFailed = false
+      let shopsConnectionFailed = false
+      let commentsConnectionFailed = false
       await db.firestore().collection('details').get()
         .then(querySnapshot => {
+          detailsConnectionFailed = querySnapshot.metadata.fromCache
           querySnapshot.forEach(doc => {
             this.responseDetails.push(doc.data())
             doc.ref.delete()
           })
         })
-      let filteredDetails = this.arrayUniqueDetails(this.transformedData.details.concat(this.responseDetails))
-      this.loadedDataDetails.newDetailsObjects = this.subtraction(filteredDetails.length, this.responseDetails.length)
-      filteredDetails.forEach(details => {
-        db.firestore().collection('details').add(details)
-      })
+      if (detailsConnectionFailed === false) {
+        console.log('response details')
+        console.log(this.responseDetails.length)
+        let filteredDetails = this.arrayUniqueDetails(this.transformedData.details.concat(this.responseDetails))
+        console.log('filtered details')
+        console.log(filteredDetails.length)
+        console.log(this.subtraction(filteredDetails.length, this.responseDetails.length))
+        this.loadedDataDetails.newDetailsObjects = this.subtraction(filteredDetails.length, this.responseDetails.length)
+        filteredDetails.forEach(details => {
+          db.firestore().collection('details').add(details)
+        })
+      }
+      console.log(this.loadedDataDetails)
       await db.firestore().collection('shops').get()
         .then(querySnapshot => {
+          shopsConnectionFailed = querySnapshot.metadata.fromCache
           querySnapshot.forEach(doc => {
             this.responseShops.push(doc.data())
             doc.ref.delete()
           })
         })
-      let filteredShops = this.arrayUniqueShops(this.transformedData.shops.concat(this.responseShops))
-      this.loadedDataDetails.newShopObjects = this.subtraction(filteredShops.length, this.responseShops.length)
-      filteredShops.forEach(shop => {
-        db.firestore().collection('shops').add(shop)
-      })
+      if (shopsConnectionFailed === false) {
+        let filteredShops = this.arrayUniqueShops(this.transformedData.shops.concat(this.responseShops))
+        this.loadedDataDetails.newShopObjects = this.subtraction(filteredShops.length, this.responseShops.length)
+        filteredShops.forEach(shop => {
+          db.firestore().collection('shops').add(shop)
+        })
+      }
       await db.firestore().collection('comments').get()
         .then(querySnapshot => {
+          commentsConnectionFailed = querySnapshot.metadata.fromCache
           querySnapshot.forEach(doc => {
             this.responseComments.push(doc.data())
             doc.ref.delete()
           })
         })
-      let filteredComments = this.arrayUniqueComments(this.transformedData.comments.concat(this.responseComments))
-      this.loadedDataDetails.newCommentObjects = this.subtraction(filteredComments.length, this.responseComments.length)
-      filteredComments.forEach(comment => {
-        db.firestore().collection('comments').add(comment)
-      })
+      if (commentsConnectionFailed === false) {
+        let filteredComments = this.arrayUniqueComments(this.transformedData.comments.concat(this.responseComments))
+        this.loadedDataDetails.newCommentObjects = this.subtraction(filteredComments.length, this.responseComments.length)
+        filteredComments.forEach(comment => {
+          db.firestore().collection('comments').add(comment)
+        })
+      }
       this.extractedData = null
       this.transformedData = null
       this.responseDetails = []
@@ -359,6 +380,7 @@ export default {
     },
     closeExtractDialog (value) {
       this.extractInfoVisibility = value
+      this.extractedDataDetails.detailsQuantity = null
       this.extractedDataDetails.shopsQuantity = null
       this.extractedDataDetails.commentsQuantity = null
     },
@@ -366,7 +388,14 @@ export default {
       this.loadInfoVisibility = value
       this.loadedDataDetails.newDetailsObjects = null
       this.loadedDataDetails.newShopObjects = null
+      this.loadedDataDetails.newCommentObjects = null
+    },
+    goToDatabaseFromLoadDialog (value) {
+      this.loadInfoVisibility = value
+      this.loadedDataDetails.newDetailsObjects = null
+      this.loadedDataDetails.newShopObjects = null
       this.loadedDataDetails.newCommentObjectsObjects = null
+      this.$router.push('/database')
     },
     closeEtlDialog (value) {
       this.etlInfoVisibility = value
@@ -380,6 +409,19 @@ export default {
       this.etlDataDetails.loadedData.shops = null
       this.etlDataDetails.loadedData.comments = null
     },
+    goToDatabaseFromEtlDialog (value) {
+      this.etlInfoVisibility = value
+      this.etlDataDetails.extractedData.details = null
+      this.etlDataDetails.extractedData.shops = null
+      this.etlDataDetails.extractedData.comments = null
+      this.etlDataDetails.transformedData.details = null
+      this.etlDataDetails.transformedData.shops = null
+      this.etlDataDetails.transformedData.comments = null
+      this.etlDataDetails.loadedData.details = null
+      this.etlDataDetails.loadedData.shops = null
+      this.etlDataDetails.loadedData.comments = null
+      this.$router.push('/database')
+    },
     transformData () {
       let extractedData = this.extractedData
       this.transformedData = {
@@ -389,12 +431,12 @@ export default {
         comments: extractedData.comments.map(this.functions.transformComments),
         commentsQuantity: extractedData.comments.length
       }
-      console.log(this.transformedData)
     }
   },
   watch: {
     'extractedData' (value) {
       if (value !== null) {
+        this.extractedDataDetails.detailsQuantity = value.details.length
         this.extractedDataDetails.shopsQuantity = value.shops.length
         this.extractedDataDetails.commentsQuantity = value.comments.length
       }

@@ -269,12 +269,17 @@
         </div>
         <div v-else-if="responseDetails.length === 0 && responseShops.length === 0 && responseComments.length === 0">
           <v-card class="ma-4 pa-3">
-            <v-card-text style="font-size: 18px" class="darken-1--text font-weight-bold" align="center">DATABASE IS EMPTY
+            <v-card-text style="font-size: 18px" class="dargetken-1--text font-weight-bold" align="center">DATABASE IS
+              EMPTY
             </v-card-text>
           </v-card>
         </div>
       </div>
     </transition>
+    <ImportInfo
+      :importInfoVisibility.sync="importInfoVisibility"
+      v-on:closeImportDialog="closeImportDialog"
+    />
   </v-container>
 </template>
 
@@ -282,9 +287,11 @@
 import db from '../database/firebaseInit'
 import JsonCSV from 'vue-json-csv'
 import Functions from '../libs/helperFunctions'
+import ImportInfo from '../components/ImportInfo'
 export default {
   name: 'Database',
   components: {
+    ImportInfo,
     JsonCSV
   },
   data () {
@@ -299,10 +306,14 @@ export default {
       circularVisibility: false,
       detailsCircularVisibility: false,
       shopsCircularVisibility: false,
-      commentsCircularVisibility: false
+      commentsCircularVisibility: false,
+      importInfoVisibility: false
     }
   },
   methods: {
+    closeImportDialog (value) {
+      this.importInfoVisibility = value
+    },
     async getData () {
       this.circularVisibility = true
       this.detailsCircularVisibility = true
@@ -349,6 +360,9 @@ export default {
       this.transformedDetails = this.responseDetails.map(this.functions.transformDetails)
       this.transformedShops = this.responseShops.map(this.functions.transformShopsToExport)
       this.transformedComments = this.responseComments.map(this.functions.transformCommentsToExport)
+      if (this.responseDetails.length > 0 || this.responseShops.length > 0 || this.responseComments.length > 0) {
+        this.importInfoVisibility = true
+      }
     },
     async deleteDetails (id) {
       await db.firestore().collection('details').get()

@@ -1,7 +1,7 @@
-# Web Scraper Vue (in progress)
+# Web Scraper Vue 
 
 ## General info
-Web Scraper Vue is simple fullstack web application for web scraping data and executing ETL process.
+Web Scraper Vue is simple fullstack web application for web scraping data and executing ETL process. 
 
 # Project setup
 
